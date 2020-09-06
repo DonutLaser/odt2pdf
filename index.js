@@ -2,6 +2,7 @@ const fs = require('fs').promises;
 const JSZIP = require('jszip');
 const xmldoc = require('xmldoc');
 const xml2js = require('./xml2js');
+const PDFDocument = require('pdfkit');
 
 async function odt2pdf(pathToOdt) {
     const file = await fs.readFile(pathToOdt);
@@ -15,9 +16,26 @@ async function odt2pdf(pathToOdt) {
 
     const contents = await zip.file('content.xml').async('nodebuffer');
     const contentsXml = new xmldoc.XmlDocument(contents);
-    const document = xml2js(contentsXml);
+    const document = xml2js(contentsXml); // Convert xml structure to json for easier handling
 
-    return null;
+    const buffers = [];
+    const result = await new Promise((resolve) => {
+        const doc = new PDFDocument({ bufferPages: true });
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => { resolve(Buffer.concat(buffers)); });
+
+        doc.font('Times-Roman');
+        document.text.forEach((line) => {
+            line.forEach((text, index) => {
+                doc.fontSize(document.styles[text.style].fontSize);
+                doc.text(text.value, { lineBrak: index < line.length - 1 });
+            });
+        });
+
+        doc.end();
+    });
+
+    return result;
 }
 
 module.exports = odt2pdf;
