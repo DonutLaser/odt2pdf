@@ -3,7 +3,6 @@ const JSZIP = require('jszip');
 const xmldoc = require('xmldoc');
 const xml2js = require('./xml2js');
 const PDFDocument = require('pdfkit');
-const iconvlite = require('iconv-lite');
 
 async function odt2pdf(pathToOdt) {
     const file = await fs.readFile(pathToOdt);
@@ -29,7 +28,7 @@ async function odt2pdf(pathToOdt) {
         doc.font('Times');
         document.text.forEach((line) => {
             line.forEach((text, index) => {
-                doc.fontSize(document.styles[text.style].fontSize);
+                if (text.style) { doc.fontSize(document.styles[text.style].fontSize); }
                 doc.text(text.value, { continued: index < line.length - 1 });
             });
         });
