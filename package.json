@@ -1,0 +1,15 @@
+{
+  "name": "odt2pdf",
+  "version": "0.0.1",
+  "description": ".odt to .pdf converter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jszip": "^3.5.0",
+    "xmldoc": "^1.1.2"
+  }
+}
