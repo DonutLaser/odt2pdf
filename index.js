@@ -22,12 +22,16 @@ async function odt2pdf(pathToOdt) {
     const result = await new Promise((resolve) => {
         const doc = new PDFDocument({ bufferPages: true });
         doc.registerFont('Times', 'fonts/times.ttf');
+        doc.registerFont('Times Bold', 'fonts/timesbd.ttf');
+
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', () => { resolve(Buffer.concat(buffers)); });
 
-        doc.font('Times');
         document.text.forEach((line) => {
             line.forEach((text, index) => {
+                const font = text.style && document.styles[text.style].bold ? 'Times Bold' : 'Times';
+                doc.font(font);
+
                 if (text.style) { doc.fontSize(document.styles[text.style].fontSize); }
                 doc.text(text.value, { continued: index < line.length - 1 });
             });

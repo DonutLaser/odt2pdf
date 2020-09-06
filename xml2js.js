@@ -1,5 +1,3 @@
-const xmldoc = require('xmldoc');
-
 function xml2js(xml) {
     const result = {
         styles: {},
@@ -11,11 +9,13 @@ function xml2js(xml) {
         const textPropertiesStyle = child.childNamed('style:text-properties');
 
         let fontSize;
+        let bold;
         if (textPropertiesStyle) {
             fontSize = parseInt(textPropertiesStyle.attr['fo:font-size'].replace(/pt/g, ''), 10);
+            bold = textPropertiesStyle.attr['fo:font-weight'] === 'bold';
         }
 
-        result.styles[styleName] = { fontSize };
+        result.styles[styleName] = { fontSize, bold };
     });
 
     xml.childNamed('office:body').childNamed('office:text').childrenNamed('text:p').forEach((node) => {
