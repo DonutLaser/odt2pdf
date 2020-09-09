@@ -19,6 +19,7 @@ function xml2js(xml) {
         if (paragraphPropertiesStyle) {
             const align = paragraphPropertiesStyle.attr['fo:text-align'];
             result.styles[styleName].alignment = align && align !== 'start' ? align : 'left';
+            result.styles[styleName].marginLeft = parseInt(paragraphPropertiesStyle.attr['fo:margin-left'].replace(/in/g, ''), 10) * 96;
         }
     });
 
@@ -36,7 +37,7 @@ function xml2js(xml) {
 
                     value += spaces;
                 } else if (child.name === 'text:tab') {
-                    // In gdocs, space is 4 pixels, tab is 48. So, a single tab is 12 spaces
+                    // In gdocs, space is 4 pixels, tab is 48 (0.5in, 1in = 96px). So, a single tab is 12 spaces
                     value += ' '.repeat(12);
                 } else if (!child.name) {
                     // We got a text node

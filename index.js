@@ -35,7 +35,11 @@ async function odt2pdf(pathToOdt) {
                 doc.font(font);
 
                 if (style.fontSize) { doc.fontSize(style.fontSize); }
-                doc.text(text.value, { continued: index < line.length - 1, align: style.alignment || 'left' });
+                doc.text(text.value, {
+                    continued: index < line.length - 1,
+                    align: style.alignment || 'left',
+                    indent: style.marginLeft,
+                });
             });
         });
 
