@@ -7,15 +7,19 @@ function xml2js(xml) {
     xml.childNamed('office:automatic-styles').eachChild((child) => {
         const styleName = child.attr['style:name'];
         const textPropertiesStyle = child.childNamed('style:text-properties');
+        const paragraphPropertiesStyle = child.childNamed('style:paragraph-properties');
 
-        let fontSize;
-        let bold;
+        result.styles[styleName] = {};
+
         if (textPropertiesStyle) {
-            fontSize = parseInt(textPropertiesStyle.attr['fo:font-size'].replace(/pt/g, ''), 10);
-            bold = textPropertiesStyle.attr['fo:font-weight'] === 'bold';
+            result.styles[styleName].fontSize = parseInt(textPropertiesStyle.attr['fo:font-size'].replace(/pt/g, ''), 10);
+            result.styles[styleName].bold = textPropertiesStyle.attr['fo:font-weight'] === 'bold';
         }
 
-        result.styles[styleName] = { fontSize, bold };
+        if (paragraphPropertiesStyle) {
+            const align = paragraphPropertiesStyle.attr['fo:text-align'];
+            result.styles[styleName].alignment = align && align !== 'start' ? align : 'left';
+        }
     });
 
     xml.childNamed('office:body').childNamed('office:text').childrenNamed('text:p').forEach((node) => {
@@ -37,7 +41,7 @@ function xml2js(xml) {
                 }
             });
 
-            return { value, style: n.attr['text:style-name'] };
+            return { value, style: n.attr['text:style-name'], paragraphStyle: node.attr['text:style-name'] };
         });
 
         if (values && values.length > 0) {

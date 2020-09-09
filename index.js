@@ -29,11 +29,13 @@ async function odt2pdf(pathToOdt) {
 
         document.text.forEach((line) => {
             line.forEach((text, index) => {
-                const font = text.style && document.styles[text.style].bold ? 'Times Bold' : 'Times';
+                const style = { ...document.styles[text.style], ...document.styles[text.paragraphStyle] };
+                // const style = text.style ? document.styles[text.style] : null;
+                const font = style.bold ? 'Times Bold' : 'Times';
                 doc.font(font);
 
-                if (text.style) { doc.fontSize(document.styles[text.style].fontSize); }
-                doc.text(text.value, { continued: index < line.length - 1 });
+                if (style.fontSize) { doc.fontSize(style.fontSize); }
+                doc.text(text.value, { continued: index < line.length - 1, align: style.alignment || 'left' });
             });
         });
 
