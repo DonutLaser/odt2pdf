@@ -35,6 +35,9 @@ function xml2js(xml) {
                     }
 
                     value += spaces;
+                } else if (child.name === 'text:tab') {
+                    // In gdocs, space is 4 pixels, tab is 48. So, a single tab is 12 spaces
+                    value += ' '.repeat(12);
                 } else if (!child.name) {
                     // We got a text node
                     value += child.text;
