@@ -27,19 +27,35 @@ async function odt2pdf(pathToOdt) {
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', () => { resolve(Buffer.concat(buffers)); });
 
+        doc.page.margins.right = 16;
+
         document.text.forEach((line) => {
             line.forEach((text, index) => {
-                const style = { ...document.styles[text.style], ...document.styles[text.paragraphStyle] };
-                // const style = text.style ? document.styles[text.style] : null;
+                const style = {
+                    ...document.styles[text.style],
+                    ...document.styles[text.paragraphStyle],
+                    ...document.styles[text.columnStyle],
+                };
+
                 const font = style.bold ? 'Times Bold' : 'Times';
                 doc.font(font);
 
                 if (style.fontSize) { doc.fontSize(style.fontSize); }
+
+                if (style.columnWidth) {
+                    let currentWidth;
+                    do {
+                        currentWidth = Math.floor(doc.widthOfString(text.value));
+                        text.value += ' ';
+                    } while (currentWidth < style.columnWidth);
+                }
+
                 doc.text(text.value, {
                     continued: index < line.length - 1,
-                    align: style.alignment || 'left',
+                    align: !text.insideTable && style.alignment ? style.alignment : 'left',
                     indent: style.marginLeft,
                 });
+
             });
         });
 
