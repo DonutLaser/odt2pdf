@@ -41,19 +41,24 @@ function xml2js(xml) {
         result.styles[styleName] = {};
 
         if (textPropertiesStyle) {
-            result.styles[styleName].fontSize = parseInt(textPropertiesStyle.attr['fo:font-size'].replace(/pt/g, ''), 10);
-            result.styles[styleName].bold = textPropertiesStyle.attr['fo:font-weight'] === 'bold';
+            const fontSize = textPropertiesStyle.attr['fo:font-size'];
+            if (fontSize) { result.styles[styleName].fontSize = Math.floor(parseInt(fontSize.replace(/pt/g, ''), 10)); }
+
+            const fontWeight = textPropertiesStyle.attr['fo:font-weight'];
+            if (fontWeight) { result.styles[styleName].bold = fontWeight === 'bold'; }
         }
 
         if (paragraphPropertiesStyle) {
             const align = paragraphPropertiesStyle.attr['fo:text-align'];
             result.styles[styleName].alignment = align && align !== 'start' ? align : 'left';
-            result.styles[styleName].marginLeft = Math.floor(parseFloat(paragraphPropertiesStyle.attr['fo:margin-left'].replace(/in/g, '')) * 72);
+
+            const marginLeft = paragraphPropertiesStyle.attr['fo:margin-left'];
+            if (marginLeft) { result.styles[styleName].marginLeft = Math.floor(parseFloat(marginLeft.replace(/in/g, '')) * 72); }
         }
 
         if (tableColumnPropertiesStyle) {
-            const columnWidth = Math.floor(parseFloat(tableColumnPropertiesStyle.attr['style:column-width'].replace(/in/g, '')) * 72);
-            result.styles[styleName].columnWidth = columnWidth;
+            const columnWidth = tableColumnPropertiesStyle.attr['style:column-width'];
+            if (columnWidth) { result.styles[styleName].columnWidth = Math.floor(parseFloat(columnWidth.replace(/in/g, '')) * 72); }
         }
     });
 
@@ -62,14 +67,25 @@ function xml2js(xml) {
             const values = parseTextPNode(child);
 
             if (values && values.length > 0) {
-                result.text.push(values);
+                const paragraph = result.styles[values[0].paragraphStyle];
+                if (paragraph && paragraph.alignment && paragraph.alignment === 'center') {
+                    // We have to concat all parts of the line into one string if it's supposed to be centered
+                    const line = { value: '' };
+                    values.forEach((value) => {
+                        line.value += value.value;
+                    });
+                    line.style = values[0].style;
+                    line.paragraphStyle = values[0].paragraphStyle;
+
+                    result.text.push([line]);
+                } else {
+                    result.text.push(values);
+                }
             } else {
                 result.text.push([{ value: ' ' }]);
             }
         } else if (child.name === 'table:table') {
             const columnStyles = child.childrenNamed('table:table-column').map(n => n.attr['table:style-name']);
-            // const columnStyles = [];
-            // child.childrenNamed('table:table-column').eachChild((col) => { columnStyles.push(col.attr['table:style-name']); });
 
             const rows = child.childrenNamed('table:table-row');
             rows.forEach((row) => {
@@ -100,6 +116,8 @@ function xml2js(xml) {
             });
         }
     });
+
+    console.log(JSON.stringify(result));
 
     return result;
 }
