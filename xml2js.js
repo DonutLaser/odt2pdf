@@ -98,7 +98,7 @@ function xml2js(xml) {
                         if (cellNode.name === 'text:p') {
                             const values = parseTextPNode(cellNode).map(v => ({ ...v, insideTable: true }));
                             values.forEach((v) => {
-                                cellText.value += ` ${v.value}`;
+                                cellText.value += `\n${v.value}`;
                                 cellText.style = v.style;
                                 cellText.paragraphStyle = v.style;
                             });
