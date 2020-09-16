@@ -56,14 +56,6 @@ async function odt2pdf(pathToOdt) {
                     indent: style.marginLeft,
                 });
 
-                const newLines = text.value.match(/\n/g);
-                if (newLines) {
-                    for (let i = 0; i < newLines.length; ++i) {
-                        doc.moveUp(1);
-                    }
-
-                    doc.x = doc.page.margins.left + style.columnWidth;
-                }
             });
         });
 
